@@ -2,29 +2,26 @@ package org.tukcity.ld30;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
+import org.tukcity.ld30.objects.ObjectStatus;
+import org.tukcity.ld30.objects.WObject;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
 public class LDGame extends ApplicationAdapter {
-	SpriteBatch batch;
-	Texture img;
+    SpriteBatch batch;
+    Texture img;
     ShapeRenderer shapeRenderer;
 
     OrthographicCamera camera;
     OrthographicCamera staticCamera;
 
-    float x = -64;
-    float y = 0;
-    float velocity = 75.0f;
+    WObject player;
     float elapsedTime = 0;
 
     float cameraVelocity = 20f;
@@ -41,12 +38,7 @@ public class LDGame extends ApplicationAdapter {
     World currentWorld = new World(1.0f, 0, 1.0f);
     World pastWorld = currentWorld;
 
-    Rectangle playerRect;
-
     Texture ground;
-
-    PlayerStatus playerStatus = PlayerStatus.NORMAL;
-    PlayerStatus lastStatus = playerStatus;
 
     Music music;
 
@@ -58,16 +50,16 @@ public class LDGame extends ApplicationAdapter {
     FPSLogger fpsLogger = new FPSLogger();
 
 
-
     @Override
-	public void create () {
+    public void create() {
 
-		batch = new SpriteBatch();
+        batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
-		img = new Texture("red.png");
+        img = new Texture("red.png");
 
-        playerRect = new Rectangle(x, y, img.getWidth(), img.getHeight());
-        camera  = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        player = new WObject(img, -64, 0);
+
+        camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         staticCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -78,24 +70,17 @@ public class LDGame extends ApplicationAdapter {
         camera.position.y = 0;
 
         music = Gdx.audio.newMusic(Gdx.files.internal("symphony.mp3"));
-        music.play();
+        //music.play();
 
         ground = new Texture("ground.png");
         Texture textures[] = {new Texture("blue.png"), new Texture("orange.png"), new Texture("purple.png"),
                 new Texture("green.png")};
 
-        int spacing = 128*textures.length + 196;
+        int spacing = 128 * textures.length + 196;
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < textures.length; j++) {
                 WObject tmp;
-//                if (i % 5 == 0){
-//                    tmp = new HorizontalMovingObject(textures[j], i * spacing + j * 196, 0);
-//                } else if (i % 6 == 0) {
-//                    tmp = new VerticalMovingObject(textures[j], i * spacing + j * 196, 0);
-//                } else {
-//                    tmp = new WObject(textures[j], i * spacing + j * 196, 0);
-//                }
-                tmp = new WObject(textures[j], i * spacing + j * 196, 0);
+                tmp = new WObject(textures[j], i * spacing + j * 32, j * 32);
                 objs.add(tmp);
             }
         }
@@ -103,7 +88,7 @@ public class LDGame extends ApplicationAdapter {
         shifts.add(new World(1.0f, 17.3f, 0.5f));
         shifts.add(new World(2.0f, 22.5f, 1.5f));
         shifts.add(new World(1.0f, 29.9f, 0.5f));
-        shifts.add(new World(2.0f,34.8f, 1.5f));
+        shifts.add(new World(2.0f, 34.8f, 1.5f));
         shifts.add(new World(1.0f, 36.2f, 0.5f));
         shifts.add(new World(1.0f, 46.2f, 1.5f));
         shifts.add(new World(1.0f, 51.1f, 1.0f));
@@ -115,21 +100,20 @@ public class LDGame extends ApplicationAdapter {
     }
 
 
-	@Override
-	public void render () {
+    @Override
+    public void render() {
 
         fpsLogger.log();
-        update(Gdx.graphics.getDeltaTime());
 
 
-		Gdx.gl.glClearColor(0, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         camera.update();
 
         batch.setProjectionMatrix(camera.combined);
-		batch.begin();
-		batch.draw(img, x, y);
+        batch.begin();
+        player.draw(batch);
 
         for (WObject o : objs) {
             //cull rendering here?
@@ -140,7 +124,6 @@ public class LDGame extends ApplicationAdapter {
 
 
         batch.end();
-
 
 
         batch.setProjectionMatrix(staticCamera.combined);
@@ -156,15 +139,15 @@ public class LDGame extends ApplicationAdapter {
             shapeRenderer.rect(o.getRect().x, o.getRect().y, o.getRect().width, o.getRect().height);
         }
 
-        shapeRenderer.rect(playerRect.x, playerRect.y, playerRect.width, playerRect.height);
+        shapeRenderer.rect(player.getRect().x, player.getRect().y, player.getRect().width, player.getRect().height);
 
         shapeRenderer.end();
 
-
+        update(Gdx.graphics.getDeltaTime());
 
 
         //System.out.println(x + ", " + y + " -- " + camera.position);
-	}
+    }
 
     @Override
     public void dispose() {
@@ -173,59 +156,62 @@ public class LDGame extends ApplicationAdapter {
 
     public void update(float delta) {
 
-       elapsedTime += delta;
-       //System.out.println("t: " + elapsedTime);
+        elapsedTime += delta;
+        //System.out.println("t: " + elapsedTime);
 
-       if (shifts.peek() != null && shifts.peek().getTime() <= elapsedTime) {
-           pastWorld = currentWorld;
-           currentWorld = shifts.poll();
-           System.out.println("world shift");
-       }
+        if (shifts.peek() != null && shifts.peek().getTime() <= elapsedTime) {
+            pastWorld = currentWorld;
+            currentWorld = shifts.poll();
+            System.out.println("world shift");
+        }
 
-       camera.translate(delta*cameraVelocity*currentWorld.getCameraModifier(), 0);
+        camera.translate(delta * cameraVelocity * currentWorld.getCameraModifier(), 0);
 
-       handleInput(delta);
+        InputService.update(delta, currentWorld, player);
 
-        playerRect.x = x;
-        playerRect.y = y;
-
-        if (playerStatus != PlayerStatus.NORMAL && playerStatus != PlayerStatus.COLLIDING) {
+        if (player.getStatus() != ObjectStatus.NORMAL && player.getStatus() != ObjectStatus.COLLIDING) {
             elapsedJumpTime += delta;
 
-            if (playerStatus == PlayerStatus.JUMPING) {
-                y += delta * jumpVelocity;
+            if (player.getStatus() == ObjectStatus.JUMPING) {
+                player.incY(delta * jumpVelocity);
 
 
                 if (elapsedJumpTime >= maxJumpTime) {
-                    switchStatus(PlayerStatus.POST_JUMP);
+                    player.setStatus(ObjectStatus.POST_JUMP);
                     //change to JUMP_PEAK to enable the peak bit
                     elapsedJumpTime = 0f;
                 }
-            } else if (playerStatus == PlayerStatus.POST_JUMP) {
-                y -= delta * jumpVelocity;
+            } else if (player.getStatus() == ObjectStatus.POST_JUMP) {
+                player.incY(-delta * jumpVelocity);
 
-                if (y < 0)
-                    y = 0;
+                if (player.getY() < 0)
+                    player.setY(0);
 
                 if (elapsedJumpTime >= maxJumpTime) {
-                    switchStatus(PlayerStatus.NORMAL);
-                    elapsedJumpTime = 0f;
-                    y = 0f;
+                    if (player.getY() > 0f) {
+                        elapsedJumpTime = 0f;
+                    } else {
+                        player.setStatus(ObjectStatus.NORMAL);
+                        elapsedJumpTime = 0f;
+                        player.setY(0);
+                    }
                 }
-            } else if (playerStatus == PlayerStatus.JUMP_PEAK) {
-                x += delta * velocity;
+            } else if (player.getStatus() == ObjectStatus.JUMP_PEAK) {
+                player.incX(delta * currentWorld.getPlayerVelocity());
 
                 if (elapsedJumpTime >= maxJumpPeakTime) {
-                    switchStatus(PlayerStatus.POST_JUMP);
+                    player.setStatus(ObjectStatus.POST_JUMP);
                     elapsedJumpTime = 0f;
                 }
             }
         }
 
+        player.update(delta, currentWorld);
+
         for (WObject o : objs) {
 
             //clean this
-            if (o.getX() < (camera.position.x - (Gdx.graphics.getWidth()/2f))) {
+            if (o.getRight() < (camera.position.x - (Gdx.graphics.getWidth() / 2f))) {
                 oldObjs.add(o);
             } else {
                 o.update(delta, currentWorld);
@@ -242,70 +228,65 @@ public class LDGame extends ApplicationAdapter {
         //we might be able to break out of the loop once we hit objects that are > 300 away
         //but we have to worry about objects behind us.
         boolean foundCollision = false;
+        boolean onTop = false;
         WObject o;
         for (int i = 0; i < 5; i++) {
 
             o = objs.get(i);
-            if (Vector2.dst(x, y, o.getX(), o.getY()) < 40) { //close enough to check collision
-                if (playerRect.overlaps(o.getRect()) && y > 0 ) {
-                    //System.out.println("found collision: " + playerRect + " -- " + o.getRect());
+            if (World.getDistance(player, o) < 40) { //close enough to check collision
 
-                    if (y >= 29) {
-                        switchStatus(PlayerStatus.COLLIDING);
-                        //y = o.getY() + 32;
-                        y = 30;
-                        foundCollision = true;
+                if (World.isColliding(player, o)) {
+                    //checks to see if player is on top of object
+
+                    if (player.getY() > 0 && player.getStatus() != ObjectStatus.JUMPING) {
+                        //System.out.println("found collision: " + playerRect + " -- " + o.getRect() + " -- " + Rectangle.tmp);
+
+                        player.setY(o.getTop() - 2);
+                        if (player.getY() >= o.getTop() - 2) {
+                            player.setStatus(ObjectStatus.COLLIDING);
+                            //y = o.getY() + 32;
+                            player.setY(o.getTop() - 2);
+                            foundCollision = true;
+                            onTop = true;
+                            o.onCollisionTop();
+                        }
                     }
+
+
+                    //check to see if player is hitting bottom of object
+//                    if (y > o.getBottom()) {
+//                        o.onCollisionBottom();
+//                        while (y > o.getBottom())
+//                            y--;
+//                    }
+                    //checks to see if player is to left of object
+                    //TODO fix this. doesn't work for ground level blocks
+                    if ((player.getX() + img.getWidth()) > o.getLeft() && !onTop) {
+                        o.onCollisionLeft();
+                        while ((player.getX() + img.getWidth()) >= o.getLeft()) {
+                            player.incX(-1);
+                            System.out.println("x: " + player.getX());
+                        }
+                    }
+
+                    //check to see if player is to right of object
+                    if (player.getX() < o.getRight() && !onTop) {
+                        o.onCollisionRight();
+                        while (player.getX() <= o.getRight())
+                            player.incX(1);
+                    }
+
 
                 }
             }
         }
 
         if (!foundCollision) {
-            if (playerStatus == PlayerStatus.COLLIDING) {
-                switchStatus(PlayerStatus.NORMAL);
-                y = 0;
-                System.out.println("collision gone");
+            if (player.getStatus() == ObjectStatus.COLLIDING) {
+                player.setStatus(ObjectStatus.POST_JUMP);
+                //y = 0;
+                //System.out.println("collision gone");
             }
-        }
-
-    }
-
-    public void switchStatus(PlayerStatus nStatus) {
-        lastStatus = playerStatus;
-        playerStatus = nStatus;
-    }
-
-    public void handleInput(float delta) {
-
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            x += delta*velocity*currentWorld.getModifier();
-        }
-
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            x -= delta*velocity*currentWorld.getModifier();
-        }
-
-//        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-//            y += delta*velocity*modifier;
-//        }
-
-//        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-//            y -= delta*velocity*modifier;
-//        }
-
-        if (Gdx.input.isKeyPressed(Input.Keys.SPACE) &&  (playerStatus == PlayerStatus.NORMAL || playerStatus == PlayerStatus.COLLIDING)) {
-            switchStatus(PlayerStatus.JUMPING);
-        }
-
-
-        //camera scroll speed
-        if (Gdx.input.isKeyPressed(Input.Keys.EQUALS)) {
-            cameraVelocity += delta*10;
-        }
-
-        if (Gdx.input.isKeyPressed(Input.Keys.MINUS)) {
-            cameraVelocity -= delta*10;
         }
 
     }

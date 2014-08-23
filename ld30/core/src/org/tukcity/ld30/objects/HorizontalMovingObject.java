@@ -8,15 +8,13 @@ import org.tukcity.ld30.World;
  */
 public class HorizontalMovingObject extends WObject {
 
-    private float xMax = 50f;
+    private final float xMax = 50f;
     private float currentX = 0;
     private State currentState = State.Left;
     private float velocity;
 
 
     private enum State {Left, Right}
-
-    ;
 
     public HorizontalMovingObject(Texture texture, float x, float y, float velocity) {
         super(texture, x, y);

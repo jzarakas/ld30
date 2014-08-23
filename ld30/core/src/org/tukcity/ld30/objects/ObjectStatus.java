@@ -5,4 +5,4 @@ package org.tukcity.ld30.objects;
  */
 public enum ObjectStatus {
     NORMAL, JUMPING, JUMP_PEAK, POST_JUMP, COLLIDING
-};
+}

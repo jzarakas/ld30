@@ -36,16 +36,25 @@ public class WObject {
 
     public void update(float delta, World world) {
         //unused but rfu
+
+        updateRect();
+    }
+
+    private void updateRect() {
         cRect.x = x;
         cRect.y = y;
     }
 
     public void setX(float x) {
         this.x = x;
+        updateRect();
+
     }
 
     public void setY(float y) {
         this.y = y;
+        updateRect();
+
     }
 
     public float getX() {
@@ -58,10 +67,14 @@ public class WObject {
 
     public void incX(float x) {
         this.x += x;
+        updateRect();
+
     }
 
     public void incY(float y) {
         this.y += y;
+        updateRect();
+
     }
 
     public Rectangle getRect() {
@@ -111,5 +124,34 @@ public class WObject {
     public void setStatus(ObjectStatus status) {
         lastStatus = currentStatus;
         currentStatus = status;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        WObject wObject = (WObject) o;
+
+        if (Float.compare(wObject.x, x) != 0) return false;
+        if (Float.compare(wObject.y, y) != 0) return false;
+        if (!cRect.equals(wObject.cRect)) return false;
+        if (currentStatus != wObject.currentStatus) return false;
+        if (lastStatus != wObject.lastStatus) return false;
+        if (!mTexture.equals(wObject.mTexture)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (x != +0.0f ? Float.floatToIntBits(x) : 0);
+        result = 31 * result + (y != +0.0f ? Float.floatToIntBits(y) : 0);
+        result = 31 * result + currentStatus.hashCode();
+        result = 31 * result + lastStatus.hashCode();
+        result = 31 * result + cRect.hashCode();
+        result = 31 * result + mTexture.hashCode();
+        return result;
     }
 }

@@ -14,7 +14,7 @@ public class World {
     private float time;
     private float cameraModifier;
     private float playerVelocity = 75f;
-    private float cameraVelocity;
+    private float cameraVelocity = 20f;
 
     public World(float modifier, float time, float cameraModifier) {
         this.modifier = modifier;

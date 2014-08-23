@@ -32,6 +32,8 @@ public final class InputService {
 
         if (Gdx.input.isKeyPressed(Input.Keys.SPACE) && (player.getStatus() == ObjectStatus.NORMAL || player.getStatus() == ObjectStatus.COLLIDING)) {
             player.setStatus(ObjectStatus.JUMPING);
+            System.out.println("jump");
+            //JumpService.add(player);
         }
 
 

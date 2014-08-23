@@ -6,7 +6,6 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import org.tukcity.ld30.objects.ObjectStatus;
 import org.tukcity.ld30.objects.WObject;
 
 import java.util.LinkedList;
@@ -14,6 +13,7 @@ import java.util.List;
 import java.util.Queue;
 
 public class LDGame extends ApplicationAdapter {
+
     SpriteBatch batch;
     Texture img;
     ShapeRenderer shapeRenderer;
@@ -23,17 +23,6 @@ public class LDGame extends ApplicationAdapter {
 
     WObject player;
     float elapsedTime = 0;
-
-    float cameraVelocity = 20f;
-
-    final float maxJumpTime = .75f;
-    float elapsedJumpTime = 0.0f;
-    float jumpVelocity = 128.0f;
-
-    float elapsedPeakTime = 0f;
-    final float maxJumpPeakTime = .4f;
-
-    boolean isColliding = false;
 
     World currentWorld = new World(1.0f, 0, 1.0f);
     World pastWorld = currentWorld;
@@ -78,9 +67,20 @@ public class LDGame extends ApplicationAdapter {
 
         int spacing = 128 * textures.length + 196;
         for (int i = 0; i < 10; i++) {
+            WObject tmp;
+
             for (int j = 0; j < textures.length; j++) {
-                WObject tmp;
                 tmp = new WObject(textures[j], i * spacing + j * 32, j * 32);
+                objs.add(tmp);
+            }
+
+            for (int j = 0; j < 7; j++) {
+                tmp = new WObject(textures[0], (4*32) + j*32, 96);
+                objs.add(tmp);
+            }
+
+            for (int j = 0; j < textures.length; j++) {
+                tmp = new WObject(textures[j], (11*32) + (j*32), 96 - (j*32));
                 objs.add(tmp);
             }
         }
@@ -165,46 +165,10 @@ public class LDGame extends ApplicationAdapter {
             System.out.println("world shift");
         }
 
-        camera.translate(delta * cameraVelocity * currentWorld.getCameraModifier(), 0);
+        camera.translate(delta * currentWorld.getCameraVelocity() * currentWorld.getCameraModifier(), 0);
 
         InputService.update(delta, currentWorld, player);
-
-        if (player.getStatus() != ObjectStatus.NORMAL && player.getStatus() != ObjectStatus.COLLIDING) {
-            elapsedJumpTime += delta;
-
-            if (player.getStatus() == ObjectStatus.JUMPING) {
-                player.incY(delta * jumpVelocity);
-
-
-                if (elapsedJumpTime >= maxJumpTime) {
-                    player.setStatus(ObjectStatus.POST_JUMP);
-                    //change to JUMP_PEAK to enable the peak bit
-                    elapsedJumpTime = 0f;
-                }
-            } else if (player.getStatus() == ObjectStatus.POST_JUMP) {
-                player.incY(-delta * jumpVelocity);
-
-                if (player.getY() < 0)
-                    player.setY(0);
-
-                if (elapsedJumpTime >= maxJumpTime) {
-                    if (player.getY() > 0f) {
-                        elapsedJumpTime = 0f;
-                    } else {
-                        player.setStatus(ObjectStatus.NORMAL);
-                        elapsedJumpTime = 0f;
-                        player.setY(0);
-                    }
-                }
-            } else if (player.getStatus() == ObjectStatus.JUMP_PEAK) {
-                player.incX(delta * currentWorld.getPlayerVelocity());
-
-                if (elapsedJumpTime >= maxJumpPeakTime) {
-                    player.setStatus(ObjectStatus.POST_JUMP);
-                    elapsedJumpTime = 0f;
-                }
-            }
-        }
+        JumpService.update(delta, currentWorld, player);
 
         player.update(delta, currentWorld);
 
@@ -221,73 +185,7 @@ public class LDGame extends ApplicationAdapter {
         objs.removeAll(oldObjs);
         oldObjs.clear();
 
-        //System.out.println("objs: " + objs.size());
-
-        //collision checks?
-        //we really need to save 2 iterations, but this works for the moment
-        //we might be able to break out of the loop once we hit objects that are > 300 away
-        //but we have to worry about objects behind us.
-        boolean foundCollision = false;
-        boolean onTop = false;
-        WObject o;
-        for (int i = 0; i < 5; i++) {
-
-            o = objs.get(i);
-            if (World.getDistance(player, o) < 40) { //close enough to check collision
-
-                if (World.isColliding(player, o)) {
-                    //checks to see if player is on top of object
-
-                    if (player.getY() > 0 && player.getStatus() != ObjectStatus.JUMPING) {
-                        //System.out.println("found collision: " + playerRect + " -- " + o.getRect() + " -- " + Rectangle.tmp);
-
-                        player.setY(o.getTop() - 2);
-                        if (player.getY() >= o.getTop() - 2) {
-                            player.setStatus(ObjectStatus.COLLIDING);
-                            //y = o.getY() + 32;
-                            player.setY(o.getTop() - 2);
-                            foundCollision = true;
-                            onTop = true;
-                            o.onCollisionTop();
-                        }
-                    }
-
-
-                    //check to see if player is hitting bottom of object
-//                    if (y > o.getBottom()) {
-//                        o.onCollisionBottom();
-//                        while (y > o.getBottom())
-//                            y--;
-//                    }
-                    //checks to see if player is to left of object
-                    //TODO fix this. doesn't work for ground level blocks
-                    if ((player.getX() + img.getWidth()) > o.getLeft() && !onTop) {
-                        o.onCollisionLeft();
-                        while ((player.getX() + img.getWidth()) >= o.getLeft()) {
-                            player.incX(-1);
-                            System.out.println("x: " + player.getX());
-                        }
-                    }
-
-                    //check to see if player is to right of object
-                    if (player.getX() < o.getRight() && !onTop) {
-                        o.onCollisionRight();
-                        while (player.getX() <= o.getRight())
-                            player.incX(1);
-                    }
-
-
-                }
-            }
-        }
-
-        if (!foundCollision) {
-            if (player.getStatus() == ObjectStatus.COLLIDING) {
-                player.setStatus(ObjectStatus.POST_JUMP);
-                //y = 0;
-                //System.out.println("collision gone");
-            }
-        }
+       CollisionService.update(delta, currentWorld, objs, player);
 
     }
 }

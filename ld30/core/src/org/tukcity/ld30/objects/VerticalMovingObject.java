@@ -8,13 +8,11 @@ import org.tukcity.ld30.World;
  */
 public class VerticalMovingObject extends WObject {
 
-    private float yMax = 50f;
+    private final float yMax = 50f;
     private State currentState = State.Up;
     private float velocity;
 
     private enum State {Up, Down}
-
-    ;
 
     public VerticalMovingObject(Texture texture, float x, float y, float velocity) {
 

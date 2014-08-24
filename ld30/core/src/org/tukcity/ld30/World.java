@@ -93,6 +93,10 @@ public class World {
     public void draw(SpriteBatch sb) {
     }
 
+    public void update(float delta) {
+
+    }
+
     public List<CollisionObject> getColliders() {
         return colliders;
     }
@@ -113,6 +117,10 @@ public class World {
         for (WObject o : objs) {
             o.draw(sb);
         }
+    }
+
+    public void drawHud(SpriteBatch sb) {
+
     }
 
     public void spawnPlayer() {

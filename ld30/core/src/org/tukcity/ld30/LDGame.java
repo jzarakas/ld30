@@ -95,13 +95,15 @@ public class LDGame extends ApplicationAdapter {
     @Override
     public void render() {
 
-        //fpsLogger.log();
+        super.render();
+
+        float delta = Gdx.graphics.getDeltaTime();
+
+        fpsLogger.log();
 
 
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        camera.update();
 
         //draw bg layers
         batch.setProjectionMatrix(staticCamera.combined);
@@ -120,7 +122,7 @@ public class LDGame extends ApplicationAdapter {
 
         batch.setProjectionMatrix(staticCamera.combined);
         batch.begin();
-        //draw hud here
+        currentWorld.drawHud(batch);
         batch.end();
 
 
@@ -143,8 +145,8 @@ public class LDGame extends ApplicationAdapter {
             shapeRenderer.end();
         }
 
-        update(Gdx.graphics.getDeltaTime());
 
+        update(delta);
 
         //System.out.println(x + ", " + y + " -- " + camera.position);
     }
@@ -165,10 +167,13 @@ public class LDGame extends ApplicationAdapter {
             //shiftWorld(shifts.poll());
         }
 
-        camera.translate(delta * currentWorld.getCameraVelocity() * currentWorld.getCameraModifier(), 0);
-        camera.position.y = player.getY();
+       camera.translate(delta * currentWorld.getCameraVelocity() * currentWorld.getCameraModifier(), 0);
+       camera.position.y = player.getY();
+        camera.update();
         JumpService.update(delta, currentWorld, player);
         InputService.update(delta, currentWorld, player);
+
+        currentWorld.update(delta);
 
         for (WObject o : currentWorld.getObjects()) {
             o.update(delta, currentWorld);

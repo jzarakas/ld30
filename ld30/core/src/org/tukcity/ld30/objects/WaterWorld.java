@@ -1,6 +1,8 @@
 package org.tukcity.ld30.objects;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import org.tukcity.ld30.World;
 import org.tukcity.ld30.utils.LevelBuilder;
@@ -9,6 +11,11 @@ import org.tukcity.ld30.utils.LevelBuilder;
  * Created by james on 8/24/14.
  */
 public class WaterWorld extends World {
+
+    private final float BREATH_LIMIT = 15f;//seconds
+    private float breathTimer = 0f;
+    private BitmapFont font = new BitmapFont();
+
     public WaterWorld(float modifier, float time, float cameraModifier) {
         super(modifier, time, cameraModifier);
 
@@ -71,11 +78,54 @@ public class WaterWorld extends World {
             //tmp = new WObject(textures.get(fish), LevelBuilder.random(0, bg.getWidth()), LevelBuilder.random(0, (int)(starty - 500f)));
             objs.add(tmp);
         }
+
+        //and lets add some bubbles
+        String bubbles[] = {BUBBLE_LG, BUBBLE_SM};
+        String bubble;
+        for (int i = 0; i < 25; i++) {
+            bubble = bubbles[LevelBuilder.random(bubbles)];
+
+            boolean type = LevelBuilder.random();
+
+            if (type) {
+                tmp = new HorizontalMovingObject(textures.get(bubble), LevelBuilder.random(0, bg.getWidth()), LevelBuilder.random(0, (int)(starty - 500f)), LevelBuilder.random(40, 120), LevelBuilder.random(0, 3));
+            } else {
+                tmp = new VerticalMovingObject(textures.get(bubble), LevelBuilder.random(0, bg.getWidth()), LevelBuilder.random(0, (int)(starty - 500f)), LevelBuilder.random(40, 120), LevelBuilder.random(0, 3));
+
+            }
+
+            tmp.setBubble(true);
+            //tmp = new WObject(textures.get(fish), LevelBuilder.random(0, bg.getWidth()), LevelBuilder.random(0, (int)(starty - 500f)));
+            objs.add(tmp);
+        }
     }
 
     @Override
     public void draw(SpriteBatch sb) {
         sb.draw(textures.get("gradient"), 0, 0);
+    }
+
+    @Override
+    public void update(float delta) {
+        breathTimer += delta;
+
+        if (breathTimer >= BREATH_LIMIT) {
+            //death!
+            System.out.println("you died!");
+
+            breathTimer = 0f;
+        }
+    }
+
+    @Override
+    public void drawHud(SpriteBatch sb) {
+        font.draw(sb, "breath: " + Math.round( ((BREATH_LIMIT - breathTimer) /BREATH_LIMIT) * 100f) + "%", 15, Gdx.graphics.getHeight());
+    }
+
+    public void addBreath(float amount) {
+        breathTimer -= amount;
+        if (breathTimer < 0)
+            breathTimer = 0;
     }
 
     private void loadTexture(String name) {

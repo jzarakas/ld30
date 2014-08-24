@@ -22,12 +22,14 @@ public final class InputService {
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             p.incX(delta * world.getPlayerVelocity() * world.getModifier());
             p.isStanding = false;
+            //p.isFacingLeft = false;
 
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             p.incX(-delta * world.getPlayerVelocity() * world.getModifier());
             p.isStanding = false;
+            //p.isFacingLeft = true;
 
         }
 

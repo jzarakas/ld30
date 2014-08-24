@@ -34,6 +34,9 @@ public class WObject implements ICollideable {
     private float xoff = 0;
     private float yoff = 0;
 
+    private boolean isBubble = false;
+
+    private boolean isDisabled;
 
     public WObject(Texture texture, float x, float y) {
         mTexture = texture;
@@ -50,14 +53,23 @@ public class WObject implements ICollideable {
 
     }
 
+    public void setBubble(boolean b) {
+        isBubble = b;
+    }
+
+    public boolean isBubble() {
+        return isBubble;
+    }
+
     public void setCollisionDimensions(float x, float y, float w, float h) {
         yoff = mTexture.getHeight() - yoff - h;
         xoff = x;
-        System.out.println(yoff);
         cRect = new Rectangle(this.x + x, this.y + yoff, w, h);
     }
 
     public void draw(SpriteBatch sb) {
+        if (isDisabled)
+            return;
         if (mTexture == null)
             return;
         sb.draw(mTexture, x, y);
@@ -65,6 +77,8 @@ public class WObject implements ICollideable {
 
     public void update(float delta, World world) {
         //unused but rfu
+        if (isDisabled)
+            return;
 
         updateRect();
     }
@@ -73,7 +87,6 @@ public class WObject implements ICollideable {
 
         cRect.x = x + xoff;
         cRect.y = y + yoff;
-        System.out.println(yoff);
     }
 
 
@@ -111,6 +124,11 @@ public class WObject implements ICollideable {
 
     public Rectangle getRect() {
         return cRect;
+    }
+
+    public void disable() {
+        cRect = new Rectangle(0, 0, 0, 0);
+        isDisabled = true;
     }
 
     public float getTop() {

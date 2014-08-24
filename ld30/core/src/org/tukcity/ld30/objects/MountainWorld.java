@@ -24,7 +24,6 @@ public class MountainWorld extends World {
     
     @Override
     public void draw(SpriteBatch sb) {
-System.out.println("drawing");
         sb.draw(textures.get("gradient"), 0, 0);
         sb.draw(textures.get("foreground"), 0, 0);
         sb.draw(textures.get("upperbg"), 0, textures.get("gradient").getHeight() - textures.get("upperbg").getHeight());

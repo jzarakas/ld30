@@ -8,41 +8,41 @@ import org.tukcity.ld30.World;
  */
 public class HorizontalMovingObject extends WObject {
 
-    private final float xMax = 50f;
-    private float currentX = 0;
+    private  float xMax = 50f;
     private State currentState = State.Left;
     private float velocity;
+
+    private float currentTime;
 
 
     private enum State {Left, Right}
 
-    public HorizontalMovingObject(Texture texture, float x, float y, float velocity) {
+    public HorizontalMovingObject(Texture texture, float x, float y, float velocity, float time) {
         super(texture, x, y);
 
         this.velocity = velocity;
+        xMax = time;
     }
 
     @Override
     public void update(float delta, World world) {
+        currentTime += delta;
         if (currentState == State.Left) {
-            if (currentX >= xMax) {
+            if (currentTime >= xMax) {
                 currentState = State.Right;
                 x -= delta * velocity * world.getModifier();
-                currentX = 0;
+                currentTime = 0;
             } else {
                 x += delta * velocity * world.getModifier();
-                currentX += delta;
-
             }
         } else if (currentState == State.Right) {
-            if (currentX >= xMax) {
+            if (currentTime >= xMax) {
                 currentState = State.Left;
                 x -= delta * velocity * world.getModifier();
-                currentX = 0;
+                currentTime = 0;
 
             } else {
-                x += delta * world.getModifier();
-                currentX += delta * velocity * world.getModifier();
+                x += delta * velocity * world.getModifier();
 
             }
         }
@@ -50,4 +50,19 @@ public class HorizontalMovingObject extends WObject {
         super.update(delta, world);
     }
 
+    @Override
+    public void onCollisionRight() {
+        super.onCollisionRight();
+
+        currentState = State.Left;
+        currentTime = 0;
+    }
+
+    @Override
+    public void onCollisionLeft() {
+        super.onCollisionLeft();
+
+        currentState = State.Right;
+        currentTime = 0;
+    }
 }

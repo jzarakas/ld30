@@ -31,6 +31,8 @@ public class WObject implements ICollideable {
 
     final private Texture mTexture;
 
+    private float xoff = 0;
+    private float yoff = 0;
 
 
     public WObject(Texture texture, float x, float y) {
@@ -39,15 +41,20 @@ public class WObject implements ICollideable {
         this.y = y;
 
 
+
         setStatus(ObjectStatus.NORMAL);
         setJumpStatus(JumpStatus.NONE);
         setCollisionStatus(CollisionStatus.NONE);
 
         cRect = new Rectangle(x, y, mTexture.getWidth(), mTexture.getHeight());
+
     }
 
     public void setCollisionDimensions(float x, float y, float w, float h) {
-        cRect = new Rectangle(this.x + x, this.y - y + mTexture.getHeight(), w, h);
+        yoff = mTexture.getHeight() - yoff - h;
+        xoff = x;
+        System.out.println(yoff);
+        cRect = new Rectangle(this.x + x, this.y + yoff, w, h);
     }
 
     public void draw(SpriteBatch sb) {
@@ -63,8 +70,10 @@ public class WObject implements ICollideable {
     }
 
     private void updateRect() {
-        cRect.x = x;
-        cRect.y = y;
+
+        cRect.x = x + xoff;
+        cRect.y = y + yoff;
+        System.out.println(yoff);
     }
 
 
@@ -164,35 +173,5 @@ public class WObject implements ICollideable {
 
     public void setCollisionStatus(CollisionStatus collisionStatus) {
         this.collisionStatus = collisionStatus;
-    }
-
-
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        WObject wObject = (WObject) o;
-
-        if (Float.compare(wObject.x, x) != 0) return false;
-        if (Float.compare(wObject.y, y) != 0) return false;
-        if (!cRect.equals(wObject.cRect)) return false;
-        if (currentStatus != wObject.currentStatus) return false;
-        if (lastStatus != wObject.lastStatus) return false;
-        if (!mTexture.equals(wObject.mTexture)) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = (x != +0.0f ? Float.floatToIntBits(x) : 0);
-        result = 31 * result + (y != +0.0f ? Float.floatToIntBits(y) : 0);
-        result = 31 * result + currentStatus.hashCode();
-        result = 31 * result + lastStatus.hashCode();
-        result = 31 * result + cRect.hashCode();
-        result = 31 * result + mTexture.hashCode();
-        return result;
     }
 }

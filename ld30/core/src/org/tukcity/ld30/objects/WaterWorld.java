@@ -36,8 +36,8 @@ public class WaterWorld extends World {
         starty = textures.get("gradient").getHeight() - 128f;
 
         //lets add some lillies
-        WObject tmp = new WObject(textures.get(LILLY_WHITE_SM), 12 * textures.get( LILLY_WHITE_SM).getWidth(), starty - 475f);
-        tmp.setCollisionDimensions(25, 40, 90 - 27, 40);
+        WObject tmp = new WObject(textures.get(LILLY_WHITE_SM), 12, starty - 475f);
+        tmp.setCollisionDimensions(25, 140, 90 - 27, 40);
         objs.add(tmp);
 
         WObject last;
@@ -49,7 +49,7 @@ public class WaterWorld extends World {
             String plant = plants[LevelBuilder.random(plants)];
 
             tmp = new WObject(textures.get(plant), i * textures.get( plant).getWidth() + tmp.getRect().width, starty - 475f);
-            tmp.setCollisionDimensions(25, 40, 90 - 27, 40);
+            tmp.setCollisionDimensions(25, 140, 90 - 27, 40);
             objs.add(tmp);
         }
 
@@ -57,15 +57,15 @@ public class WaterWorld extends World {
         String fishes[] = {FISH_BLUE, FISH_GREEN_LG, FISH_GREEN_SM};
         String fish;
         Texture bg = textures.get("gradient");
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 15; i++) {
            fish = fishes[LevelBuilder.random(fishes)];
 
             boolean type = LevelBuilder.random();
 
             if (type) {
-                tmp = new HorizontalMovingObject(textures.get(fish), LevelBuilder.random(0, bg.getWidth()), LevelBuilder.random(0, (int)(starty - 500f)), 50f);
+                tmp = new HorizontalMovingObject(textures.get(fish), LevelBuilder.random(0, bg.getWidth()), LevelBuilder.random(0, (int)(starty - 500f)), LevelBuilder.random(40, 120), LevelBuilder.random(0, 3));
             } else {
-                tmp = new VerticalMovingObject(textures.get(fish), LevelBuilder.random(0, bg.getWidth()), LevelBuilder.random(0, (int)(starty - 500f)), 50f, 3.0f);
+                tmp = new VerticalMovingObject(textures.get(fish), LevelBuilder.random(0, bg.getWidth()), LevelBuilder.random(0, (int)(starty - 500f)), LevelBuilder.random(40, 120), LevelBuilder.random(0, 3));
 
             }
             //tmp = new WObject(textures.get(fish), LevelBuilder.random(0, bg.getWidth()), LevelBuilder.random(0, (int)(starty - 500f)));

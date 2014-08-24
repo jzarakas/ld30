@@ -35,6 +35,9 @@ public final class CollisionService {
         if (player.getCollisionStatus() == CollisionStatus.NONE && player.getJumpStatus() == JumpStatus.NONE)
             player.setJumpStatus(JumpStatus.DOWN);
 
+        if (player.getCollisionStatus() == CollisionStatus.BOTTOM && player.getJumpStatus() == JumpStatus.DOWN)
+            player.setJumpStatus(JumpStatus.NONE);
+
     }
 
     private static void checkCollision(ICollideable o, WObject player) {
@@ -53,6 +56,7 @@ public final class CollisionService {
                         player.setJumpStatus(JumpStatus.NONE);
                     }
                     player.setCollisionStatus(CollisionStatus.BOTTOM);
+                    return;
                 }
 
             }

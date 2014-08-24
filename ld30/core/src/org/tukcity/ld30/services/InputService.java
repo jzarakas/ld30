@@ -31,10 +31,9 @@ public final class InputService {
             player.incY(-delta * world.getPlayerVelocity() * world.getModifier());
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.SPACE) && (player.getJumpStatus() == JumpStatus.NONE)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.SPACE) && (player.getJumpStatus() != JumpStatus.UP)) {
             player.setJumpStatus(JumpStatus.UP);
             System.out.println("jump");
-            //JumpService.add(player);
         }
 
 

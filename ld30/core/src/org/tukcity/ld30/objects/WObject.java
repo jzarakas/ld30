@@ -15,6 +15,9 @@ import org.tukcity.ld30.objects.status.ObjectStatus;
  */
 public class WObject implements ICollideable {
 
+    protected float startx;
+    protected float starty;
+
     float x;
     protected float y;
 
@@ -24,9 +27,10 @@ public class WObject implements ICollideable {
     private JumpStatus jumpStatus;
     private CollisionStatus collisionStatus;
 
-    final private Rectangle cRect; //collision rectangle
+    private Rectangle cRect; //collision rectangle
 
     final private Texture mTexture;
+
 
 
     public WObject(Texture texture, float x, float y) {
@@ -34,11 +38,16 @@ public class WObject implements ICollideable {
         this.x = x;
         this.y = y;
 
+
         setStatus(ObjectStatus.NORMAL);
         setJumpStatus(JumpStatus.NONE);
         setCollisionStatus(CollisionStatus.NONE);
 
         cRect = new Rectangle(x, y, mTexture.getWidth(), mTexture.getHeight());
+    }
+
+    public void setCollisionDimensions(float x, float y, float w, float h) {
+        cRect = new Rectangle(this.x + x, this.y - y + mTexture.getHeight(), w, h);
     }
 
     public void draw(SpriteBatch sb) {
@@ -156,6 +165,7 @@ public class WObject implements ICollideable {
     public void setCollisionStatus(CollisionStatus collisionStatus) {
         this.collisionStatus = collisionStatus;
     }
+
 
 
     @Override

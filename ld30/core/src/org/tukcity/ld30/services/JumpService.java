@@ -2,6 +2,7 @@ package org.tukcity.ld30.services;
 
 import org.tukcity.ld30.World;
 import org.tukcity.ld30.objects.WObject;
+import org.tukcity.ld30.objects.status.CollisionStatus;
 import org.tukcity.ld30.objects.status.JumpStatus;
 
 /**
@@ -37,7 +38,7 @@ public final class JumpService {
 //            System.out.println("Starting jump");
 //            System.out.println("-------------");
         if (player.getJumpStatus() == JumpStatus.UP) {
-            player.incY(delta * JUMP_VELOCITY);
+            player.incY(delta * JUMP_VELOCITY * world.getModifier());
             //System.out.println("going up");
 
             if (elapsedJumpTime >= MAX_JUMP_TIME) {
@@ -46,10 +47,10 @@ public final class JumpService {
                 //change to JUMP_PEAK to enable the peak bit
                 elapsedJumpTime = 0f;
             }
-        } else if (player.getJumpStatus() == JumpStatus.DOWN) {
+        } else if (player.getJumpStatus() == JumpStatus.DOWN && player.getCollisionStatus() != CollisionStatus.BOTTOM) {
             //System.out.println("going down");
 
-            player.incY(-delta * JUMP_VELOCITY);
+            player.incY(-delta * JUMP_VELOCITY * world.getModifier());
 
             if (elapsedJumpTime >= MAX_JUMP_TIME) {
                 if (player.getY() > 0f) {

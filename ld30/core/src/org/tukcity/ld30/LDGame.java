@@ -57,9 +57,15 @@ public class LDGame extends ApplicationAdapter {
     @Override
     public void create() {
 
-        colliders.add(new CollisionObject(new Rectangle(startx, starty - 10f, 381.09183f - startx - 10f, 10f)));
-        colliders.add(new CollisionObject(new Rectangle(381.2536f, 1724.5408f - 10f,460.99518f - 381.2536f - 10f, 10f )));
-        colliders.add(new CollisionObject(new Rectangle(553.8203f, 1724.5408f - 10f, 100f, 10f)));
+        //x - 60
+        //y - 233;
+
+//        colliders.add(new CollisionObject(new Rectangle(startx, 1752.7062f, 375, 11)));
+//        colliders.add(new CollisionObject(new Rectangle(383, 1720.0796f , 75, 11)));
+//        colliders.add(new CollisionObject(new Rectangle(548.9675f, 1709.0221f, 76f, 11f)));
+//        colliders.add(new CollisionObject(new Rectangle(625.0952f, 1751.9916f, 507, 11f)));
+
+        colliders = LevelBuilder.generate("level.json");
         mountains.put("gradient", new Texture("mountains/gradient.png"));
         mountains.put("lowerbg", new Texture("mountains/lowerbg.png"));
         mountains.put("upperbg", new Texture("mountains/upperbg.png"));
@@ -146,17 +152,11 @@ public class LDGame extends ApplicationAdapter {
         batch.begin();
 
         batch.draw(mountains.get("gradient"), 0, 0);
-        batch.draw(mountains.get("upperbg"), 0, Gdx.graphics.getHeight() - mountains.get("upperbg").getHeight());
-        batch.draw(mountains.get("lowerbg"), 0, Gdx.graphics.getHeight() - mountains.get("upperbg").getHeight() - mountains.get("lowerbg").getHeight());
+        //batch.draw(mountains.get("upperbg"), 0, 0);
+        //batch.draw(mountains.get("lowerbg"), 0, Gdx.graphics.getHeight() - mountains.get("upperbg").getHeight() - mountains.get("lowerbg").getHeight());
         batch.draw(mountains.get("foreground"), 0, 0);
         player.draw(batch);
         for (WObject o : objs) {
-            //cull rendering here?
-            //o.draw(batch);
-
-
-
-
         }
 
 
@@ -165,7 +165,7 @@ public class LDGame extends ApplicationAdapter {
 
         batch.setProjectionMatrix(staticCamera.combined);
         batch.begin();
-        //batch.draw(ground, 0, 0);
+        //draw hud here
         batch.end();
 
         shapeRenderer.setProjectionMatrix(camera.combined);

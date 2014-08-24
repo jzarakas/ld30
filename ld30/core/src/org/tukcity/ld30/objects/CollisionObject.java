@@ -2,6 +2,7 @@ package org.tukcity.ld30.objects;
 
 import com.badlogic.gdx.math.Rectangle;
 import org.tukcity.ld30.ICollideable;
+import org.tukcity.ld30.LevelBuilder;
 import org.tukcity.ld30.objects.status.CollisionStatus;
 
 /**
@@ -18,6 +19,11 @@ public class CollisionObject implements ICollideable {
 
     public CollisionObject(float x, float y, float w, float h) {
         rect = new Rectangle(x, y, w, h);
+    }
+
+    public CollisionObject(LevelBuilder.RectWrapper wrapper) {
+        if (wrapper.h < 10f) wrapper.h = 10f;
+        rect = new Rectangle(wrapper.x, wrapper.y, wrapper.w, wrapper.h);
     }
 
     @Override

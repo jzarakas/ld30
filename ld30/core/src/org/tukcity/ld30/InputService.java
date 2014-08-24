@@ -24,7 +24,7 @@ public final class InputService {
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            player.incY(delta * world.getPlayerVelocity() * world.getModifier());
+            player.incY(delta * world.getPlayerVelocity() * world.getModifier() * 2f);
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {

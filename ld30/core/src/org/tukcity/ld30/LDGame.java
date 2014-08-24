@@ -7,16 +7,16 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import org.tukcity.ld30.objects.CollisionObject;
+import org.tukcity.ld30.objects.MountainWorld;
 import org.tukcity.ld30.objects.WObject;
+import org.tukcity.ld30.objects.WaterWorld;
 import org.tukcity.ld30.services.CollisionService;
 import org.tukcity.ld30.services.InputService;
 import org.tukcity.ld30.services.JumpService;
 import org.tukcity.ld30.utils.DebugInputProcessor;
 import org.tukcity.ld30.utils.LevelBuilder;
 
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 
 public class LDGame extends ApplicationAdapter {
@@ -28,50 +28,37 @@ public class LDGame extends ApplicationAdapter {
     OrthographicCamera camera;
     OrthographicCamera staticCamera;
 
-    WObject player;
     float elapsedTime = 0;
 
-    World currentWorld = new World(1.0f, 0, 1.0f);
+    World currentWorld;
     World pastWorld = currentWorld;
 
     Music music;
 
-    final List<WObject> objs = new LinkedList<WObject>();
-    final List<WObject> oldObjs = new LinkedList<WObject>();
 
     final Queue<World> shifts = new LinkedList<World>();
 
     final FPSLogger fpsLogger = new FPSLogger();
 
-    final HashMap<String, Texture> mountains = new HashMap<String, Texture>();
-
-
-    //yay magic
-    final float startx = 2.3920102f;
-    final float starty = 1758.2645f;
-
-    List<CollisionObject> colliders = new LinkedList<CollisionObject>();
 
     DebugInputProcessor debugInputProcessor;
+
+    WObject player;
 
 
     @Override
     public void create() {
 
 
-        colliders = LevelBuilder.generate("mountain.json");
-        mountains.put("gradient", new Texture("mountains/gradient.png"));
-        mountains.put("lowerbg", new Texture("mountains/lowerbg.png"));
-        mountains.put("upperbg", new Texture("mountains/upperbg.png"));
-        mountains.put("foreground", new Texture("mountains/foreground.png"));
+        currentWorld = new WaterWorld(1.0f, 1.0f, 1.0f);
+
 
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         img = new Texture("red.png");
 
-        player = new WObject(img, -64, mountains.get("foreground").getHeight() - 175);
-        player.setX(startx);
-        player.setY(starty);
+        currentWorld.spawnPlayer();
+        player = currentWorld.getPlayer();
 
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -98,7 +85,7 @@ public class LDGame extends ApplicationAdapter {
         shifts.add(new World(1.0f, 73.1f, 1.0f));
         shifts.add(new World(1.0f, 81.4f, 1.0f));
 
-        debugInputProcessor = new DebugInputProcessor(currentWorld);
+        debugInputProcessor = new DebugInputProcessor(this, currentWorld);
         Gdx.input.setInputProcessor(debugInputProcessor);
 
 
@@ -123,17 +110,10 @@ public class LDGame extends ApplicationAdapter {
         batch.end();
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
+        currentWorld.draw(batch);
 
-        batch.draw(mountains.get("gradient"), 0, 0);
-        batch.draw(mountains.get("foreground"), 0, 0);
-        batch.draw(mountains.get("upperbg"), 0, mountains.get("gradient").getHeight() - mountains.get("upperbg").getHeight());
-        batch.draw(mountains.get("lowerbg"), 0, mountains.get("gradient").getHeight() - mountains.get("upperbg").getHeight());
-        player.draw(batch);
-
-        for (WObject o : objs) {
-            //if we add objs back in then we will WObject.update() here
-        }
-
+        currentWorld.drawObjects(batch);
+        currentWorld.getPlayer().draw(batch);
 
         batch.end();
 
@@ -149,7 +129,11 @@ public class LDGame extends ApplicationAdapter {
             shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
             shapeRenderer.setColor(Color.YELLOW);
 
-            for (CollisionObject o : colliders) {
+            for (CollisionObject o : currentWorld.getColliders()) {
+                shapeRenderer.rect(o.getRect().x, o.getRect().y, o.getRect().width, o.getRect().height);
+            }
+
+            for (WObject o : currentWorld.getObjects()) {
                 shapeRenderer.rect(o.getRect().x, o.getRect().y, o.getRect().width, o.getRect().height);
             }
 
@@ -171,7 +155,6 @@ public class LDGame extends ApplicationAdapter {
     }
 
     public void update(float delta) {
-
         //System.out.println(player.getX() + "," + player.getY());
 
         elapsedTime += delta;
@@ -179,7 +162,7 @@ public class LDGame extends ApplicationAdapter {
 
         if (shifts.peek() != null && shifts.peek().getTime() <= elapsedTime) {
 
-            shiftWorld(shifts.poll());
+            //shiftWorld(shifts.poll());
         }
 
         camera.translate(delta * currentWorld.getCameraVelocity() * currentWorld.getCameraModifier(), 0);
@@ -187,30 +170,25 @@ public class LDGame extends ApplicationAdapter {
         JumpService.update(delta, currentWorld, player);
         InputService.update(delta, currentWorld, player);
 
-        player.update(delta, currentWorld);
-
-        for (WObject o : objs) {
-
-            //clean this
-            if (o.getRight() < (camera.position.x - (Gdx.graphics.getWidth() / 2f))) {
-                oldObjs.add(o);
-            } else {
-                o.update(delta, currentWorld);
-            }
+        for (WObject o : currentWorld.getObjects()) {
+            o.update(delta, currentWorld);
         }
 
-        objs.removeAll(oldObjs);
-        oldObjs.clear();
+        player.update(delta, currentWorld);
 
-        //CollisionService.update(delta, currentWorld, objs, player);
-
-        CollisionService.update(delta, currentWorld, colliders, player);
+        CollisionService.update(delta, currentWorld, currentWorld.getObjects(), player);
+        CollisionService.update(delta, currentWorld, currentWorld.getColliders(), player);
     }
 
     public void shiftWorld(World world) {
         pastWorld = currentWorld;
         currentWorld = world;
         debugInputProcessor.setWorld(world);
+        player = currentWorld.getPlayer();
         System.out.println("world shift");
+    }
+
+    public OrthographicCamera getCamera() {
+        return camera;
     }
 }

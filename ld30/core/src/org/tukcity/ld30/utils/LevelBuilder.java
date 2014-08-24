@@ -34,6 +34,24 @@ public final class LevelBuilder {
         return list;
     }
 
+    //lower is inclusive, upper is exclusive.
+    public static int random(int lower, int upper) {
+        return (int)(Math.random() * (upper - lower)) + lower;
+    }
+
+    public static int random(Object[] o) {
+        return random(0, o.length);
+    }
+
+    public static boolean random() {
+        int i = random(0, 2);
+
+        if (i == 1)
+            return true;
+
+        return false;
+    }
+
     public static final class RectWrapper {
         public float x;
         public float y;
@@ -43,4 +61,6 @@ public final class LevelBuilder {
         public RectWrapper() {
         }
     }
+
+
 }

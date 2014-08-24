@@ -8,31 +8,40 @@ import org.tukcity.ld30.World;
  */
 public class VerticalMovingObject extends WObject {
 
-    private final float yMax = 50f;
+    private float yMax = 50f;
     private State currentState = State.Up;
     private float velocity;
 
+    private float currentTime;
+
     private enum State {Up, Down}
 
-    public VerticalMovingObject(Texture texture, float x, float y, float velocity) {
+    public VerticalMovingObject(Texture texture, float x, float y, float velocity, float time) {
 
         super(texture, x, y);
 
         this.velocity = velocity;
+
+        yMax = time;
     }
 
     @Override
     public void update(float delta, World world) {
+
+        currentTime += delta;
+
         if (currentState == State.Up) {
-            if (y >= yMax) {
+            if (currentTime >= yMax) {
                 currentState = State.Down;
+                currentTime = 0f;
                 y -= delta * velocity * world.getModifier();
             } else {
                 y += delta * velocity * world.getModifier();
             }
         } else if (currentState == State.Down) {
-            if (y <= 0) {
+            if ( currentTime >= yMax) {
                 currentState = State.Up;
+                currentTime = 0f;
                 y += delta * velocity * world.getModifier();
             } else {
                 y -= delta * velocity * world.getModifier();
@@ -42,4 +51,20 @@ public class VerticalMovingObject extends WObject {
         super.update(delta, world);
     }
 
+
+    @Override
+    public void onCollisionTop() {
+        super.onCollisionTop();
+
+        currentState = State.Down;
+        currentTime = 0f;
+    }
+
+    @Override
+    public void onCollisionBottom() {
+        super.onCollisionBottom();
+
+        currentState = State.Up;
+        currentTime = 0f;
+    }
 }

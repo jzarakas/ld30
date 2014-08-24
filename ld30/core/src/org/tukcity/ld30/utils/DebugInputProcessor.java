@@ -2,6 +2,7 @@ package org.tukcity.ld30.utils;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import org.tukcity.ld30.LDGame;
 import org.tukcity.ld30.World;
 
 /**
@@ -10,8 +11,11 @@ import org.tukcity.ld30.World;
 public class DebugInputProcessor implements InputProcessor {
 
     private World world;
+    private LDGame game;
 
-    public DebugInputProcessor(World world) {
+    public DebugInputProcessor(LDGame game, World world) {
+
+        this.game = game;
         this.world = world;
     }
 
@@ -85,6 +89,11 @@ public class DebugInputProcessor implements InputProcessor {
 
     @Override
     public boolean scrolled(int amount) {
+
+        game.getCamera().zoom += amount * 0.75f;
+        if (game.getCamera().zoom < 0)
+            game.getCamera().zoom = 0;
+
         return false;
     }
 }

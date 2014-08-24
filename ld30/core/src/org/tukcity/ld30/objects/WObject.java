@@ -3,12 +3,17 @@ package org.tukcity.ld30.objects;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import org.tukcity.ld30.ICollideable;
+import org.tukcity.ld30.JumpService;
 import org.tukcity.ld30.World;
+import org.tukcity.ld30.objects.status.CollisionStatus;
+import org.tukcity.ld30.objects.status.JumpStatus;
+import org.tukcity.ld30.objects.status.ObjectStatus;
 
 /**
  * Created by james on 8/23/14.
  */
-public class WObject {
+public class WObject implements ICollideable {
 
     protected float x;
     protected float y;
@@ -16,9 +21,14 @@ public class WObject {
     private ObjectStatus currentStatus;
     private ObjectStatus lastStatus;
 
+    private JumpStatus jumpStatus;
+    private CollisionStatus collisionStatus;
+
     private Rectangle cRect; //collision rectangle
 
     private Texture mTexture;
+
+
 
     public WObject(Texture texture, float x, float y) {
         mTexture = texture;
@@ -26,11 +36,15 @@ public class WObject {
         this.y = y;
 
         setStatus(ObjectStatus.NORMAL);
+        setJumpStatus(JumpStatus.NONE);
+        setCollisionStatus(CollisionStatus.NONE);
 
         cRect = new Rectangle(x, y, mTexture.getWidth(), mTexture.getHeight());
     }
 
     public void draw(SpriteBatch sb) {
+        if (mTexture == null)
+            return;
         sb.draw(mTexture, x, y);
     }
 
@@ -44,6 +58,8 @@ public class WObject {
         cRect.x = x;
         cRect.y = y;
     }
+
+
 
     public void setX(float x) {
         this.x = x;
@@ -124,6 +140,23 @@ public class WObject {
     public void setStatus(ObjectStatus status) {
         lastStatus = currentStatus;
         currentStatus = status;
+    }
+
+    public JumpStatus getJumpStatus() {
+        return jumpStatus;
+    }
+
+    public void setJumpStatus(JumpStatus jumpStatus) {
+        this.jumpStatus = jumpStatus;
+        JumpService.reset();
+    }
+
+    public CollisionStatus getCollisionStatus() {
+        return collisionStatus;
+    }
+
+    public void setCollisionStatus(CollisionStatus collisionStatus) {
+        this.collisionStatus = collisionStatus;
     }
 
 

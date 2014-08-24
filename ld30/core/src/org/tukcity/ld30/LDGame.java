@@ -6,8 +6,11 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
+import org.tukcity.ld30.objects.CollisionObject;
 import org.tukcity.ld30.objects.WObject;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -38,15 +41,38 @@ public class LDGame extends ApplicationAdapter {
 
     FPSLogger fpsLogger = new FPSLogger();
 
+    HashMap<String, Texture> mountains = new HashMap<String, Texture>();
+
+
+    //yay magic
+    float startx = 2.3920102f;
+    float starty = 1758.2645f;
+
+    List<CollisionObject> colliders = new LinkedList<CollisionObject>();
+
+
+
+
 
     @Override
     public void create() {
+
+        colliders.add(new CollisionObject(new Rectangle(startx, starty - 10f, 381.09183f - startx - 10f, 10f)));
+        colliders.add(new CollisionObject(new Rectangle(381.2536f, 1724.5408f - 10f,460.99518f - 381.2536f - 10f, 10f )));
+        colliders.add(new CollisionObject(new Rectangle(553.8203f, 1724.5408f - 10f, 100f, 10f)));
+        mountains.put("gradient", new Texture("mountains/gradient.png"));
+        mountains.put("lowerbg", new Texture("mountains/lowerbg.png"));
+        mountains.put("upperbg", new Texture("mountains/upperbg.png"));
+        mountains.put("foreground", new Texture("mountains/foreground.png"));
+        mountains.put("alpha", new Texture("mountains/alpha.png"));
 
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         img = new Texture("red.png");
 
-        player = new WObject(img, -64, 0);
+        player = new WObject(img, -64, mountains.get("foreground").getHeight()-175);
+        player.setX(startx);
+        player.setY(starty);
 
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -66,24 +92,24 @@ public class LDGame extends ApplicationAdapter {
                 new Texture("green.png")};
 
         int spacing = 128 * textures.length + 196;
-        for (int i = 0; i < 10; i++) {
-            WObject tmp;
-
-            for (int j = 0; j < textures.length; j++) {
-                tmp = new WObject(textures[j], i * spacing + j * 32, j * 32);
-                objs.add(tmp);
-            }
-
-            for (int j = 0; j < 7; j++) {
-                tmp = new WObject(textures[0], (4*32) + j*32, 96);
-                objs.add(tmp);
-            }
-
-            for (int j = 0; j < textures.length; j++) {
-                tmp = new WObject(textures[j], (11*32) + (j*32), 96 - (j*32));
-                objs.add(tmp);
-            }
-        }
+//        for (int i = 0; i < 10; i++) {
+//            WObject tmp;
+//
+//            for (int j = 0; j < textures.length; j++) {
+//                tmp = new WObject(textures[j], i * spacing + j * 32, j * 32);
+//                objs.add(tmp);
+//            }
+//
+//            for (int j = 0; j < 7; j++) {
+//                tmp = new WObject(textures[0], (4*32) + j*32, 96);
+//                objs.add(tmp);
+//            }
+//
+//            for (int j = 0; j < textures.length; j++) {
+//                tmp = new WObject(textures[j], (11*32) + (j*32), 96 - (j*32));
+//                objs.add(tmp);
+//            }
+//        }
 
         shifts.add(new World(1.0f, 17.3f, 0.5f));
         shifts.add(new World(2.0f, 22.5f, 1.5f));
@@ -111,13 +137,24 @@ public class LDGame extends ApplicationAdapter {
 
         camera.update();
 
+        //draw bg layers
+        batch.setProjectionMatrix(staticCamera.combined);
+        batch.begin();
+
+        batch.end();
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-        player.draw(batch);
 
+        batch.draw(mountains.get("gradient"), 0, 0);
+        batch.draw(mountains.get("upperbg"), 0, Gdx.graphics.getHeight() - mountains.get("upperbg").getHeight());
+        batch.draw(mountains.get("lowerbg"), 0, Gdx.graphics.getHeight() - mountains.get("upperbg").getHeight() - mountains.get("lowerbg").getHeight());
+        batch.draw(mountains.get("foreground"), 0, 0);
+        player.draw(batch);
         for (WObject o : objs) {
             //cull rendering here?
-            o.draw(batch);
+            //o.draw(batch);
+
+
 
 
         }
@@ -128,16 +165,17 @@ public class LDGame extends ApplicationAdapter {
 
         batch.setProjectionMatrix(staticCamera.combined);
         batch.begin();
-        batch.draw(ground, 0, 0);
+        //batch.draw(ground, 0, 0);
         batch.end();
 
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(Color.YELLOW);
 
-        for (WObject o : objs) {
+        for (CollisionObject o : colliders) {
             shapeRenderer.rect(o.getRect().x, o.getRect().y, o.getRect().width, o.getRect().height);
         }
+
 
         shapeRenderer.rect(player.getRect().x, player.getRect().y, player.getRect().width, player.getRect().height);
 
@@ -156,6 +194,8 @@ public class LDGame extends ApplicationAdapter {
 
     public void update(float delta) {
 
+        //System.out.println(player.getX() + "," + player.getY());
+
         elapsedTime += delta;
         //System.out.println("t: " + elapsedTime);
 
@@ -166,9 +206,9 @@ public class LDGame extends ApplicationAdapter {
         }
 
         camera.translate(delta * currentWorld.getCameraVelocity() * currentWorld.getCameraModifier(), 0);
-
-        InputService.update(delta, currentWorld, player);
+        camera.position.y = player.getY();
         JumpService.update(delta, currentWorld, player);
+        InputService.update(delta, currentWorld, player);
 
         player.update(delta, currentWorld);
 
@@ -185,7 +225,8 @@ public class LDGame extends ApplicationAdapter {
         objs.removeAll(oldObjs);
         oldObjs.clear();
 
-       CollisionService.update(delta, currentWorld, objs, player);
+       //CollisionService.update(delta, currentWorld, objs, player);
 
+       CollisionService.update(delta, currentWorld, colliders, player);
     }
 }

@@ -1,7 +1,10 @@
 package org.tukcity.ld30;
 
-import org.tukcity.ld30.objects.ObjectStatus;
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Rectangle;
 import org.tukcity.ld30.objects.WObject;
+import org.tukcity.ld30.objects.status.CollisionStatus;
+import org.tukcity.ld30.objects.status.JumpStatus;
 
 import java.util.List;
 
@@ -10,76 +13,56 @@ import java.util.List;
  */
 public class CollisionService {
 
-    private CollisionService() { }
+    private CollisionService() {
+    }
 
-    public static void update(float delta, World world, List<WObject> objects, WObject player) {
+    public static void update(float delta, World world, List<? extends ICollideable> objects, WObject player) {
         //collision checks?
         //we really need to save 2 iterations, but this works for the moment
         //we might be able to break out of the loop once we hit objects that are > 300 away
         //but we have to worry about objects behind us.
         boolean foundCollision = false;
-        boolean onTop = false;
-        WObject o;
 
+        player.setCollisionStatus(CollisionStatus.NONE);
         int len = 50;
         if (len > objects.size()) len = objects.size();
         for (int i = 0; i < len; i++) {
 
-            o = objects.get(i);
-            if (World.getDistance(player, o) < 40) { //close enough to check collision
+             checkCollision(objects.get(i), player);
 
-                if (World.isColliding(player, o)) {
-                    //checks to see if player is on top of object
-
-                    if (player.getY() > 0 && player.getStatus() != ObjectStatus.JUMPING) {
-                        //System.out.println("found collision: " + playerRect + " -- " + o.getRect() + " -- " + Rectangle.tmp);
-
-                        player.setY(o.getTop() - 2);
-                        if (player.getY() >= o.getTop() - 2) {
-                            player.setStatus(ObjectStatus.COLLIDING);
-                            //y = o.getY() + 32;
-                            player.setY(o.getTop() - 2);
-                            foundCollision = true;
-                            onTop = true;
-                            o.onCollisionTop();
-                        }
-                    }
-
-
-                    //check to see if player is hitting bottom of object
-//                    if (y > o.getBottom()) {
-//                        o.onCollisionBottom();
-//                        while (y > o.getBottom())
-//                            y--;
-//                    }
-                    //checks to see if player is to left of object
-                    //TODO fix this. doesn't work for ground level blocks
-                    if (player.getRight() > o.getLeft() ) {
-                        o.onCollisionLeft();
-                        while ((player.getX() + player.getRect().getWidth()) >= o.getLeft() && player.getStatus() == ObjectStatus.NORMAL) {
-                            player.incX(-1);
-                            System.out.println("x: " + player.getX());
-                        }
-                    }
-
-                    //check to see if player is to right of object
-                    if (player.getLeft() < o.getRight() && player.getStatus() == ObjectStatus.NORMAL) {
-                        o.onCollisionRight();
-                        while (player.getX() <= o.getRight())
-                            player.incX(1);
-                    }
-
-
-                }
-            }
         }
 
-        if (!foundCollision) {
-            if (player.getStatus() == ObjectStatus.COLLIDING) {
-                player.setStatus(ObjectStatus.POST_JUMP);
-                //y = 0;
-                //System.out.println("collision gone");
-            }
-        }
+        if (player.getCollisionStatus() == CollisionStatus.NONE && player.getJumpStatus() == JumpStatus.NONE)
+            player.setJumpStatus(JumpStatus.DOWN);
+
     }
+
+    public static void checkCollision(ICollideable o, WObject player) {
+
+        if (World.getDistance(player, o) < 4000) { //close enough to check collision
+
+            //ok we have a collision.
+            if (isColliding(player, o)) {
+
+                //see if the player's bottom is on top of a collider
+                if (player.getBottom() < (o.getTop() - 1)) { //yep.
+                    player.setY(o.getTop() - 1);
+
+                    //if we're on the down portion of our jump, stop.
+                    if (player.getJumpStatus() == JumpStatus.DOWN) {
+                        player.setJumpStatus(JumpStatus.NONE);
+                    }
+                    player.setCollisionStatus(CollisionStatus.BOTTOM);
+                }
+
+            }
+
+        }
+
+    }
+
+    private static boolean isColliding(WObject player, ICollideable b) {
+        return Intersector.intersectRectangles(player.getRect(), b.getRect(), Rectangle.tmp);
+    }
+
 }

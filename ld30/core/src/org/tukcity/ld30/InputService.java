@@ -2,7 +2,8 @@ package org.tukcity.ld30;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import org.tukcity.ld30.objects.ObjectStatus;
+import org.tukcity.ld30.objects.status.JumpStatus;
+import org.tukcity.ld30.objects.status.ObjectStatus;
 import org.tukcity.ld30.objects.WObject;
 
 /**
@@ -22,16 +23,16 @@ public final class InputService {
             player.incX(-delta * world.getPlayerVelocity() * world.getModifier());
         }
 
-//        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-//            y += delta*velocity*modifier;
-//        }
+        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+            player.incY(delta * world.getPlayerVelocity() * world.getModifier());
+        }
 
-//        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-//            y -= delta*velocity*modifier;
-//        }
+        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+            player.incY(-delta * world.getPlayerVelocity() * world.getModifier());
+        }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.SPACE) && (player.getStatus() == ObjectStatus.NORMAL || player.getStatus() == ObjectStatus.COLLIDING)) {
-            player.setStatus(ObjectStatus.JUMPING);
+        if (Gdx.input.isKeyPressed(Input.Keys.SPACE) && (player.getJumpStatus() == JumpStatus.NONE)) {
+            player.setJumpStatus(JumpStatus.UP);
             System.out.println("jump");
             //JumpService.add(player);
         }

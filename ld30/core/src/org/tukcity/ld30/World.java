@@ -3,6 +3,7 @@ package org.tukcity.ld30;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.sun.org.apache.bcel.internal.generic.ICONST;
 import org.tukcity.ld30.objects.WObject;
 
 /**
@@ -46,12 +47,8 @@ public class World {
         return cameraVelocity;
     }
 
-    public static float getDistance(WObject a, WObject b) {
-        return Vector2.dst(a.getX(), a.getY(), b.getX(), b.getY());
-    }
-
-    public static boolean isColliding(WObject a, WObject b) {
-        return Intersector.intersectRectangles(a.getRect(), b.getRect(), Rectangle.tmp);
+    public static float getDistance(WObject a, ICollideable b) {
+        return Vector2.dst(a.getX(), a.getY(), b.getRect().x, b.getRect().y);
     }
 
 }

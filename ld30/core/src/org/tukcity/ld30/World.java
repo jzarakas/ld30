@@ -1,10 +1,8 @@
 package org.tukcity.ld30;
 
-import com.badlogic.gdx.math.Intersector;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.sun.org.apache.bcel.internal.generic.ICONST;
 import org.tukcity.ld30.objects.WObject;
+import org.tukcity.ld30.services.ICollideable;
 
 /**
  * Created by james on 8/23/14.
@@ -16,6 +14,7 @@ public class World {
     private float cameraModifier;
     private float playerVelocity = 75f;
     private float cameraVelocity = 20f;
+    private static boolean debugRenderer = false;
 
     public World(float modifier, float time, float cameraModifier) {
         this.modifier = modifier;
@@ -51,4 +50,20 @@ public class World {
         return Vector2.dst(a.getX(), a.getY(), b.getRect().x, b.getRect().y);
     }
 
+    public void incPlayerVelocity(float v) {
+        playerVelocity += v;
+    }
+
+    public void incCameraModifier(float v) {
+        cameraModifier += v;
+    }
+
+    public static void toggleDebugRenderer() {
+        debugRenderer = !debugRenderer;
+    }
+
+    public static boolean getDebugRenderer() {
+        return debugRenderer;
+    }
 }
+

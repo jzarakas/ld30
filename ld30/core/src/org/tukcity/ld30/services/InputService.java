@@ -1,10 +1,10 @@
-package org.tukcity.ld30;
+package org.tukcity.ld30.services;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import org.tukcity.ld30.objects.status.JumpStatus;
-import org.tukcity.ld30.objects.status.ObjectStatus;
+import org.tukcity.ld30.World;
 import org.tukcity.ld30.objects.WObject;
+import org.tukcity.ld30.objects.status.JumpStatus;
 
 /**
  * Created by james on 8/23/14.
@@ -45,6 +45,22 @@ public final class InputService {
 
         if (Gdx.input.isKeyPressed(Input.Keys.MINUS)) {
             world.incCameraVelocity(-delta * 10);
+        }
+
+        //camera modifier
+        if (Gdx.input.isKeyPressed(Input.Keys.SEMICOLON)) {
+            world.incCameraModifier(-delta * 10);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.APOSTROPHE)) {
+            world.incCameraModifier(delta * 10);
+        }
+
+        //player velocity modifier
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT_BRACKET)) {
+            world.incPlayerVelocity(-delta * 10);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT_BRACKET)) {
+            world.incPlayerVelocity(delta * 10);
         }
 
     }

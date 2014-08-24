@@ -6,9 +6,13 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Rectangle;
 import org.tukcity.ld30.objects.CollisionObject;
 import org.tukcity.ld30.objects.WObject;
+import org.tukcity.ld30.services.CollisionService;
+import org.tukcity.ld30.services.InputService;
+import org.tukcity.ld30.services.JumpService;
+import org.tukcity.ld30.utils.DebugInputProcessor;
+import org.tukcity.ld30.utils.LevelBuilder;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -30,53 +34,42 @@ public class LDGame extends ApplicationAdapter {
     World currentWorld = new World(1.0f, 0, 1.0f);
     World pastWorld = currentWorld;
 
-    Texture ground;
-
     Music music;
 
-    List<WObject> objs = new LinkedList<WObject>();
-    List<WObject> oldObjs = new LinkedList<WObject>();
+    final List<WObject> objs = new LinkedList<WObject>();
+    final List<WObject> oldObjs = new LinkedList<WObject>();
 
-    Queue<World> shifts = new LinkedList<World>();
+    final Queue<World> shifts = new LinkedList<World>();
 
-    FPSLogger fpsLogger = new FPSLogger();
+    final FPSLogger fpsLogger = new FPSLogger();
 
-    HashMap<String, Texture> mountains = new HashMap<String, Texture>();
+    final HashMap<String, Texture> mountains = new HashMap<String, Texture>();
 
 
     //yay magic
-    float startx = 2.3920102f;
-    float starty = 1758.2645f;
+    final float startx = 2.3920102f;
+    final float starty = 1758.2645f;
 
     List<CollisionObject> colliders = new LinkedList<CollisionObject>();
 
-
-
+    DebugInputProcessor debugInputProcessor;
 
 
     @Override
     public void create() {
 
-        //x - 60
-        //y - 233;
 
-//        colliders.add(new CollisionObject(new Rectangle(startx, 1752.7062f, 375, 11)));
-//        colliders.add(new CollisionObject(new Rectangle(383, 1720.0796f , 75, 11)));
-//        colliders.add(new CollisionObject(new Rectangle(548.9675f, 1709.0221f, 76f, 11f)));
-//        colliders.add(new CollisionObject(new Rectangle(625.0952f, 1751.9916f, 507, 11f)));
-
-        colliders = LevelBuilder.generate("level.json");
+        colliders = LevelBuilder.generate("mountain.json");
         mountains.put("gradient", new Texture("mountains/gradient.png"));
         mountains.put("lowerbg", new Texture("mountains/lowerbg.png"));
         mountains.put("upperbg", new Texture("mountains/upperbg.png"));
         mountains.put("foreground", new Texture("mountains/foreground.png"));
-        mountains.put("alpha", new Texture("mountains/alpha.png"));
 
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         img = new Texture("red.png");
 
-        player = new WObject(img, -64, mountains.get("foreground").getHeight()-175);
+        player = new WObject(img, -64, mountains.get("foreground").getHeight() - 175);
         player.setX(startx);
         player.setY(starty);
 
@@ -91,31 +84,7 @@ public class LDGame extends ApplicationAdapter {
         camera.position.y = 0;
 
         music = Gdx.audio.newMusic(Gdx.files.internal("symphony.mp3"));
-        //music.play();
-
-        ground = new Texture("ground.png");
-        Texture textures[] = {new Texture("blue.png"), new Texture("orange.png"), new Texture("purple.png"),
-                new Texture("green.png")};
-
-        int spacing = 128 * textures.length + 196;
-//        for (int i = 0; i < 10; i++) {
-//            WObject tmp;
-//
-//            for (int j = 0; j < textures.length; j++) {
-//                tmp = new WObject(textures[j], i * spacing + j * 32, j * 32);
-//                objs.add(tmp);
-//            }
-//
-//            for (int j = 0; j < 7; j++) {
-//                tmp = new WObject(textures[0], (4*32) + j*32, 96);
-//                objs.add(tmp);
-//            }
-//
-//            for (int j = 0; j < textures.length; j++) {
-//                tmp = new WObject(textures[j], (11*32) + (j*32), 96 - (j*32));
-//                objs.add(tmp);
-//            }
-//        }
+        music.play();
 
         shifts.add(new World(1.0f, 17.3f, 0.5f));
         shifts.add(new World(2.0f, 22.5f, 1.5f));
@@ -129,13 +98,17 @@ public class LDGame extends ApplicationAdapter {
         shifts.add(new World(1.0f, 73.1f, 1.0f));
         shifts.add(new World(1.0f, 81.4f, 1.0f));
 
+        debugInputProcessor = new DebugInputProcessor(currentWorld);
+        Gdx.input.setInputProcessor(debugInputProcessor);
+
+
     }
 
 
     @Override
     public void render() {
 
-        fpsLogger.log();
+        //fpsLogger.log();
 
 
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -152,11 +125,13 @@ public class LDGame extends ApplicationAdapter {
         batch.begin();
 
         batch.draw(mountains.get("gradient"), 0, 0);
-        //batch.draw(mountains.get("upperbg"), 0, 0);
-        //batch.draw(mountains.get("lowerbg"), 0, Gdx.graphics.getHeight() - mountains.get("upperbg").getHeight() - mountains.get("lowerbg").getHeight());
         batch.draw(mountains.get("foreground"), 0, 0);
+        batch.draw(mountains.get("upperbg"), 0, mountains.get("gradient").getHeight() - mountains.get("upperbg").getHeight());
+        batch.draw(mountains.get("lowerbg"), 0, mountains.get("gradient").getHeight() - mountains.get("upperbg").getHeight());
         player.draw(batch);
+
         for (WObject o : objs) {
+            //if we add objs back in then we will WObject.update() here
         }
 
 
@@ -168,18 +143,21 @@ public class LDGame extends ApplicationAdapter {
         //draw hud here
         batch.end();
 
-        shapeRenderer.setProjectionMatrix(camera.combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.setColor(Color.YELLOW);
 
-        for (CollisionObject o : colliders) {
-            shapeRenderer.rect(o.getRect().x, o.getRect().y, o.getRect().width, o.getRect().height);
+        if (World.getDebugRenderer()) {
+            shapeRenderer.setProjectionMatrix(camera.combined);
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+            shapeRenderer.setColor(Color.YELLOW);
+
+            for (CollisionObject o : colliders) {
+                shapeRenderer.rect(o.getRect().x, o.getRect().y, o.getRect().width, o.getRect().height);
+            }
+
+
+            shapeRenderer.rect(player.getRect().x, player.getRect().y, player.getRect().width, player.getRect().height);
+
+            shapeRenderer.end();
         }
-
-
-        shapeRenderer.rect(player.getRect().x, player.getRect().y, player.getRect().width, player.getRect().height);
-
-        shapeRenderer.end();
 
         update(Gdx.graphics.getDeltaTime());
 
@@ -200,9 +178,8 @@ public class LDGame extends ApplicationAdapter {
         //System.out.println("t: " + elapsedTime);
 
         if (shifts.peek() != null && shifts.peek().getTime() <= elapsedTime) {
-            pastWorld = currentWorld;
-            currentWorld = shifts.poll();
-            System.out.println("world shift");
+
+            shiftWorld(shifts.poll());
         }
 
         camera.translate(delta * currentWorld.getCameraVelocity() * currentWorld.getCameraModifier(), 0);
@@ -225,8 +202,15 @@ public class LDGame extends ApplicationAdapter {
         objs.removeAll(oldObjs);
         oldObjs.clear();
 
-       //CollisionService.update(delta, currentWorld, objs, player);
+        //CollisionService.update(delta, currentWorld, objs, player);
 
-       CollisionService.update(delta, currentWorld, colliders, player);
+        CollisionService.update(delta, currentWorld, colliders, player);
+    }
+
+    public void shiftWorld(World world) {
+        pastWorld = currentWorld;
+        currentWorld = world;
+        debugInputProcessor.setWorld(world);
+        System.out.println("world shift");
     }
 }

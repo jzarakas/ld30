@@ -3,8 +3,8 @@ package org.tukcity.ld30.objects;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
-import org.tukcity.ld30.ICollideable;
-import org.tukcity.ld30.JumpService;
+import org.tukcity.ld30.services.ICollideable;
+import org.tukcity.ld30.services.JumpService;
 import org.tukcity.ld30.World;
 import org.tukcity.ld30.objects.status.CollisionStatus;
 import org.tukcity.ld30.objects.status.JumpStatus;
@@ -15,7 +15,7 @@ import org.tukcity.ld30.objects.status.ObjectStatus;
  */
 public class WObject implements ICollideable {
 
-    protected float x;
+    float x;
     protected float y;
 
     private ObjectStatus currentStatus;
@@ -24,10 +24,9 @@ public class WObject implements ICollideable {
     private JumpStatus jumpStatus;
     private CollisionStatus collisionStatus;
 
-    private Rectangle cRect; //collision rectangle
+    final private Rectangle cRect; //collision rectangle
 
-    private Texture mTexture;
-
+    final private Texture mTexture;
 
 
     public WObject(Texture texture, float x, float y) {
@@ -58,7 +57,6 @@ public class WObject implements ICollideable {
         cRect.x = x;
         cRect.y = y;
     }
-
 
 
     public void setX(float x) {

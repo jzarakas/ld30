@@ -1,7 +1,8 @@
-package org.tukcity.ld30;
+package org.tukcity.ld30.services;
 
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
+import org.tukcity.ld30.World;
 import org.tukcity.ld30.objects.WObject;
 import org.tukcity.ld30.objects.status.CollisionStatus;
 import org.tukcity.ld30.objects.status.JumpStatus;
@@ -11,7 +12,7 @@ import java.util.List;
 /**
  * Created by james on 8/23/14.
  */
-public class CollisionService {
+public final class CollisionService {
 
     private CollisionService() {
     }
@@ -26,10 +27,9 @@ public class CollisionService {
         player.setCollisionStatus(CollisionStatus.NONE);
         int len = 50;
         if (len > objects.size()) len = objects.size();
+
         for (int i = 0; i < len; i++) {
-
-             checkCollision(objects.get(i), player);
-
+            checkCollision(objects.get(i), player);
         }
 
         if (player.getCollisionStatus() == CollisionStatus.NONE && player.getJumpStatus() == JumpStatus.NONE)
@@ -37,7 +37,7 @@ public class CollisionService {
 
     }
 
-    public static void checkCollision(ICollideable o, WObject player) {
+    private static void checkCollision(ICollideable o, WObject player) {
 
         if (World.getDistance(player, o) < 4000) { //close enough to check collision
 

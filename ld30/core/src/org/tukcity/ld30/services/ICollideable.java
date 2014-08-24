@@ -1,4 +1,4 @@
-package org.tukcity.ld30;
+package org.tukcity.ld30.services;
 
 import com.badlogic.gdx.math.Rectangle;
 import org.tukcity.ld30.objects.status.CollisionStatus;

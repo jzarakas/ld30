@@ -1,14 +1,14 @@
 package org.tukcity.ld30.objects;
 
 import com.badlogic.gdx.math.Rectangle;
-import org.tukcity.ld30.ICollideable;
-import org.tukcity.ld30.LevelBuilder;
+import org.tukcity.ld30.services.ICollideable;
 import org.tukcity.ld30.objects.status.CollisionStatus;
+import org.tukcity.ld30.utils.LevelBuilder;
 
 /**
  * Created by james on 8/23/14.
  */
-public class CollisionObject implements ICollideable {
+public final class CollisionObject implements ICollideable {
 
     private Rectangle rect;
     private CollisionStatus collisionStatus;

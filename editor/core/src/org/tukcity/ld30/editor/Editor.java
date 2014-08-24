@@ -52,7 +52,8 @@ public class Editor extends ApplicationAdapter {
 
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		batch = new SpriteBatch();
+
+        batch = new SpriteBatch();
 		img = new Texture("mountains/foreground.png");
         Gdx.input.setInputProcessor(new InputProcessor() {
             @Override
@@ -65,7 +66,7 @@ public class Editor extends ApplicationAdapter {
                 if (keycode == Input.Keys.P) {
                     Gson g = new Gson();
 
-                    FileHandle fileHandle = Gdx.files.local("level.json");
+                    FileHandle fileHandle = Gdx.files.local("mountain.json");
                     fileHandle.writeString(g.toJson(rectList), false);
                     System.out.println(g.toJson(rectList));
                 }
@@ -119,7 +120,11 @@ public class Editor extends ApplicationAdapter {
 
             @Override
             public boolean scrolled(int amount) {
-                return false;
+                camera.zoom += amount * 0.75f;
+
+                if (camera.zoom < 0)
+                    camera.zoom = 0;
+                return true;
             }
         });
 	}

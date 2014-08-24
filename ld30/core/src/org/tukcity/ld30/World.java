@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import org.tukcity.ld30.objects.CollisionObject;
+import org.tukcity.ld30.objects.PlayerObject;
 import org.tukcity.ld30.objects.WObject;
 import org.tukcity.ld30.services.ICollideable;
 
@@ -115,7 +116,7 @@ public class World {
     }
 
     public void spawnPlayer() {
-        player = new WObject(textures.get("player"), startx, starty);
+        player = new PlayerObject(textures.get("player"), startx, starty);
 }
 
     public WObject getPlayer() {

@@ -171,6 +171,10 @@ public class WObject implements ICollideable {
         return collisionStatus;
     }
 
+    public void setCRectHack(Rectangle r) {
+        cRect = r;
+    }
+
     public void setCollisionStatus(CollisionStatus collisionStatus) {
         this.collisionStatus = collisionStatus;
     }

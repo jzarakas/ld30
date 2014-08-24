@@ -3,6 +3,7 @@ package org.tukcity.ld30.services;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import org.tukcity.ld30.World;
+import org.tukcity.ld30.objects.PlayerObject;
 import org.tukcity.ld30.objects.WObject;
 import org.tukcity.ld30.objects.status.JumpStatus;
 
@@ -15,25 +16,38 @@ public final class InputService {
     }
 
     public static void update(float delta, World world, WObject player) {
+        PlayerObject p = (PlayerObject)player;
+        p.isStanding = true;
+
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            player.incX(delta * world.getPlayerVelocity() * world.getModifier());
+            p.incX(delta * world.getPlayerVelocity() * world.getModifier());
+            p.isStanding = false;
+
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            player.incX(-delta * world.getPlayerVelocity() * world.getModifier());
+            p.incX(-delta * world.getPlayerVelocity() * world.getModifier());
+            p.isStanding = false;
+
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            player.incY(delta * world.getPlayerVelocity() * world.getModifier() * 2f);
+            p.incY(delta * world.getPlayerVelocity() * world.getModifier() * 2f);
+            p.isStanding = false;
+
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            player.incY(-delta * world.getPlayerVelocity() * world.getModifier());
+            p.incY(-delta * world.getPlayerVelocity() * world.getModifier());
+            p.isStanding = false;
+
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.SPACE) && (player.getJumpStatus() != JumpStatus.UP)) {
-            player.setJumpStatus(JumpStatus.UP);
+            p.setJumpStatus(JumpStatus.UP);
             System.out.println("jump");
+            p.isStanding = false;
+
         }
 
 
